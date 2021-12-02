@@ -6,18 +6,17 @@
   (car
    (seq-reduce
     (lambda (acc window-values)
-      (let* ((previuous-elem (cdr acc))
+      (let* ((previuous-value (cdr acc))
              (greater-than-before-counter (car acc))
-             (window-values-sum (seq-reduce (lambda (acc elem) (+ acc elem)) window-values 0))
-             (new-previous-elem window-values-sum)
+             (window-values-sum (seq-reduce '+ window-values 0))
              (counter
               (if (and
-                   (/= previuous-elem -1)
+                   (/= previuous-value -1)
                    (> window-values-sum
-                      previuous-elem))
+                      previuous-value))
                   (+ greater-than-before-counter 1)
                 greater-than-before-counter)))
-        (cons counter new-previous-elem)))
+        (cons counter window-values-sum)))
     measuraments
     (cons 0 -1))))
 
@@ -31,12 +30,11 @@
          (sliding-window (list 0 1 2 3 4 5) 3)
          (list (list 0 1 2) (list 1 2 3) (list 2 3 4) (list 3 4 5))))
 
-
 (defun number-list-from-file-content (file-path)
   "Get a list of numbers from `FILE-PATH' content splitting by \n."
   (with-temp-buffer
     (insert-file-contents file-path)
-    (seq-map (lambda (s) (string-to-number s)) (split-string (buffer-string) "\n"))))
+    (seq-map 'string-to-number (split-string (buffer-string) "\n"))))
 
 (solution_1 (sliding-window '(199 200 208 210 200 207 240 269 260 263) 1))
 (solution_1 (sliding-window (number-list-from-file-content "./day_1.txt") 1))
