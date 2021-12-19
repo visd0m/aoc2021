@@ -18,17 +18,6 @@
  6 10  3 18  5
  1 12 20 15 19" "\n"))
 
-(defun update-nth-in-list (list nth new-value step)
-  (if (equal step nth)
-      (progn
-        (setcdr list (cdr list))
-        (setcar list new-value))
-    (update-nth-in-list (cdr list) nth new-value (+ 1 step))))
-
-(let* ((test-list (list 1 2 3 4)))
-  (update-nth-in-list test-list 3 5 0)
-  test-list)
-
 (defun try-mark-row (row number)
   (let* ((found? (assoc number row))
          (found-as-bool (if found? t nil)))
