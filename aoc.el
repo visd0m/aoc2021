@@ -229,15 +229,15 @@
  6 10  3 18  5
  1 12 20 15 19" "\n"))
 
-(defun set-nth-list (list nth new-value step)
+(defun update-nth-in-list (list nth new-value step)
   (if (equal step nth)
       (progn
         (setcdr list (cdr list))
         (setcar list new-value))
-    (set-nth-list (cdr list) nth new-value (+ 1 step))))
+    (update-nth-in-list (cdr list) nth new-value (+ 1 step))))
 
 (let* ((test-list (list 1 2 3 4)))
-  (set-nth-list test-list 3 5 0)
+  (update-nth-in-list test-list 3 5 0)
   test-list)
 
 (defun try-mark-row (row number)
@@ -257,7 +257,7 @@
                      (current-line (nth row-index board))
                      (mark-number-result (try-mark-row current-line number))
                      (line-to-insert (car mark-number-result)))
-                (set-nth-list board row-index line-to-insert 0)
+                (update-nth-in-list board row-index line-to-insert 0)
                 (cons board (cdr mark-number-result))))))
         (number-sequence 0 (- (length board) 1))
         (cons board nil))))
@@ -345,7 +345,6 @@
           extracted-numbers
           (cons boards nil)))))
 
-(solution_day_4 (read-file-as-string "./day_4.in") 'last)
 (solution_day_4 "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
 22 13 17 11  0
@@ -365,3 +364,7 @@
 18  8 23 26 20
 22 11 13  6  5
  2  0 12  3  7" 'last)
+;; part 1
+(solution_day_4 (read-file-as-string "./day_4.in") 'first)
+;; part 2
+(solution_day_4 (read-file-as-string "./day_4.in") 'last)
