@@ -1,4 +1,5 @@
 (load-file "../input.el")
+(load-file "../list.el")
 
 (defun read-boards-from-input-lines (lines)
   (let* ((boards-lines (seq-subseq lines 1 (length lines)))

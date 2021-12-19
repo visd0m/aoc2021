@@ -1,7 +1,5 @@
 (load-file "../input.el")
-
-(defun nth-list (list-of-lists index)
-  (seq-map (lambda (list) (nth index list)) list-of-lists))
+(load-file "../list.el")
 
 (defun most-or-least-common-bit (bits most-or-least)
   (let* ((counters (seq-reduce
