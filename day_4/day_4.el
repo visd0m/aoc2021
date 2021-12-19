@@ -35,7 +35,7 @@
                      (current-line (nth row-index board))
                      (mark-number-result (try-mark-row current-line number))
                      (line-to-insert (car mark-number-result)))
-                (update-nth-in-list board row-index line-to-insert 0)
+                (update-nth-in-list board row-index line-to-insert)
                 (cons board (cdr mark-number-result))))))
         (number-sequence 0 (- (length board) 1))
         (cons board nil))))
