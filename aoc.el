@@ -319,7 +319,7 @@
          (board-sum (seq-reduce '+ sum-rows 0)))
     (* extracted-number board-sum)))
 
-(defun solution_day_4 (input-as-string)
+(defun solution_day_4 (input-as-string firt-or-last)
   (let* ((lines (seq-remove 'string-empty-p (split-string input-as-string "\n")))
          (extracted-numbers (seq-map 'string-to-number (split-string (first lines) ",")))
          (boards (read-boards-from-input-lines lines)))
@@ -327,16 +327,25 @@
           (lambda (state number)
             (let ((winning-score (cdr state))
                   (boards (car state)))
-              (if winning-score
+              (if (and winning-score (equal 'first firt-or-last))
                   (cons boards winning-score)
                 (let* ((boards (seq-map (lambda (board) (try-mark-number board number)) boards))
-                       (winning-board (seq-find 'bingo? boards))
-                       (winning-score (if winning-board (winning-score winning-board number) nil)))
-                  (cons boards winning-score)))))
+                       ;; more than one board can win for the same number 
+                       (winning-boards (seq-filter 'bingo? boards))
+                       ;; the first of the winning boards is considered as the FIRST winning board
+                       (winning-board (first winning-boards))
+                       (winning-score (if winning-board (winning-score winning-board number) winning-score)))
+                  (cons
+                   (seq-remove (lambda (board)
+                                 (seq-find (lambda (winning-board)
+                                             (equal winning-board board))
+                                           winning-boards))
+                               boards)
+                   winning-score)))))
           extracted-numbers
           (cons boards nil)))))
 
-(solution_day_4 (read-file-as-string "./day_4.in"))
+(solution_day_4 (read-file-as-string "./day_4.in") 'last)
 (solution_day_4 "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
 22 13 17 11  0
@@ -355,6 +364,4 @@
 10 16 15  9 19
 18  8 23 26 20
 22 11 13  6  5
- 2  0 12  3  7")
-
-
+ 2  0 12  3  7" 'last)
