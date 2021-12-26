@@ -35,30 +35,32 @@
   "Get last point of `LINE'"
   (cdr line))
 
-(defun is-valid-line? (line)
-  "Return true if `LINE' is a horizontal or vertical line."
+(defun is-valid-line? (line with-diagonal?)
+  "Return true if `LINE' is a horizontal,  vertical line or diagonal if `WITH-DIAGONAL?' is non nil."
+  (or (is-horizontal? line) (is-vertical? line) (and with-diagonal? (is-diagonal-45? line))))
+
+(defun is-horizontal? (line)
   (let* ((p1 (p1 line))
          (p2 (p2 line))
          (x1 (x p1))
+         (x2 (x p2)))
+    (equal x1 x2)))
+
+(defun is-vertical? (line)
+  (let* ((p1 (p1 line))
+         (p2 (p2 line))
          (y1 (y p1))
-         (x2 (x p2))
          (y2 (y p2)))
-    (or (equal x1 x2) (equal y1 y2))))
+    (equal y1 y2)))
 
-(defun range (from to)
-  "Get the list of points (x, y) existing between `FROM' and `TO'."
-  (let (result (list))
-    (while (not (equal from to))
-      (setq result (push from result)
-            from (next-point from to)))
-    (nreverse (push from result))))
-
-(range (cons 0 0) (cons 0 3))
-
-(assert (equal (list (cons 0 0) (cons 0 1) (cons 0 2) (cons 0 3)) (range (cons 0 0) (cons 0 3))))
-(assert (equal (list (cons 0 0) (cons 1 0) (cons 2 0) (cons 3 0)) (range (cons 0 0) (cons 3 0))))
-(assert (equal (list (cons 0 0) (cons 1 1) (cons 2 2) (cons 3 3)) (range (cons 0 0) (cons 3 3))))
-(range (cons 735 73) (cons 316 73))
+(defun is-diagonal-45? (line)
+  (let* ((p1 (p1 line))
+         (p2 (p2 line))
+         (y1 (y p1))
+         (y2 (y p2))
+         (x1 (x p1))
+         (x2 (x p2)))
+    (equal (abs (- y2 y1)) (abs (- x2 x1)))))
 
 (defun next-point (from to)
   "Get nex point going from `FROM' to `TO'."
@@ -76,14 +78,43 @@
 (assert (equal (cons 0 4) (next-point (cons -1 4) (cons 0 4))))
 (assert (equal (cons 0 5) (next-point (cons -1 4) (cons 0 5))))
 
-(defun day_5 ()
+(defun range (from to)
+  "Get the list of points (x, y) existing between `FROM' and `TO'."
+  (let (result (list))
+    (while (not (equal from to))
+      (setq result (push from result)
+            from (next-point from to)))
+    (nreverse (push from result))))
+
+(range (cons 0 0) (cons 0 3))
+
+(assert (equal (list (cons 0 0) (cons 0 1) (cons 0 2) (cons 0 3)) (range (cons 0 0) (cons 0 3))))
+(assert (equal (list (cons 0 0) (cons 1 0) (cons 2 0) (cons 3 0)) (range (cons 0 0) (cons 3 0))))
+(assert (equal (list (cons 0 0) (cons 1 1) (cons 2 2) (cons 3 3)) (range (cons 0 0) (cons 3 3))))
+(range (cons 735 73) (cons 316 73))
+
+(defun day_5 (with-diagonal?)
   (let* ((input-lines (seq-map 'parse-line (split-string (read-file-as-string "./day_5.in") "\n")))
-         (valid-lines (seq-filter 'is-valid-line? input-lines))
+         (valid-lines (seq-filter (lambda (line) (is-valid-line? line with-diagonal?)) input-lines))
          (points (seq-map (lambda (fromto) (range (car fromto) (cdr fromto))) valid-lines))
          (points (apply 'append points))
-         ;; the grouping by opertion is extremely slow
-         (grouped (seq-group-by (lambda (point) (format "%s,%s" (x point) (y point))) points))
-         (more-than-one-occurrence (seq-filter (lambda (entry) (>= (length (cdr entry)) 2)) grouped)))
-    (length more-than-one-occurrence)))
+         (grouped (seq-reduce (lambda (acc point)
+                                (let* ((key (intern (format "%s,%s" (x point) (y point))))
+                                       (present-value (gethash key acc)))
+                                  (if present-value
+                                      (progn (puthash key (+ 1 present-value) acc) acc)
+                                    (progn (puthash key 1 acc) acc))))
+                              points
+                              (make-hash-table)))
+         (counter 0))
+    (maphash (lambda (key value)
+               (if (>= value 2)
+                   (setq counter (+ 1 counter))))
+             grouped)
+    counter))
 
-(day_5)
+;; first part
+(day_5 nil)
+
+;; second part
+(day_5 t)
